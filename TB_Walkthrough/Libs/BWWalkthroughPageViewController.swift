@@ -1,26 +1,26 @@
 /*
-The MIT License (MIT)
-
-Copyright (c) 2015 Yari D'areglia @bitwaker
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+ The MIT License (MIT)
+ 
+ Copyright (c) 2015 Yari D'areglia @bitwaker
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ */
 
 
 import UIKit
@@ -60,17 +60,20 @@ public class BWWalkthroughPageViewController: UIViewController, BWWalkthroughPag
         }
     }
     @IBInspectable var animateAlpha:Bool = false
-    @IBInspectable var staticTags:String {                                 // A comma separated list of tags that you don't want to animate during the transition/scroll 
+    @IBInspectable var staticTags:String {                                 // A comma separated list of tags that you don't want to animate during the transition/scroll
         set(value){
-            self.notAnimatableViews = value.componentsSeparatedByString(",").map{Int($0)!}
+            
+            self.notAnimatableViews = value.components(separatedBy: ",").map{Int($0)!}
+            //value.componentsSeparatedByString(",").map{Int($0)!}
         }
         get{
-            return notAnimatableViews.map{String($0)}.joinWithSeparator(",")
+            return notAnimatableViews.map{String($0)}.joined(separator: ",")
+            // return notAnimatableViews.map{String($0)}
         }
     }
     
     // MARK: BWWalkthroughPage Implementation
-
+    
     override public func viewDidLoad() {
         super.viewDidLoad()
         self.view.layer.masksToBounds = true
@@ -88,67 +91,67 @@ public class BWWalkthroughPageViewController: UIViewController, BWWalkthroughPag
     
     public func walkthroughDidScroll(position: CGFloat, offset: CGFloat) {
         
-        for(var i = 0; i < subsWeights.count ;i++){
+        for i in 0 ..< subsWeights.count{
             
             // Perform Transition/Scale/Rotate animations
             switch animation{
                 
             case .Linear:
-                animationLinear(i, offset)
+                animationLinear(index: i, offset)
                 
             case .Zoom:
-                animationZoom(i, offset)
+                animationZoom(index: i, offset)
                 
             case .Curve:
-                animationCurve(i, offset)
+                animationCurve(index: i, offset)
                 
             case .InOut:
-                animationInOut(i, offset)
+                animationInOut(index: i, offset)
             }
             
             // Animate alpha
             if(animateAlpha){
-                animationAlpha(i, offset)
+                animationAlpha(index: i, offset)
             }
         }
     }
-
+    
     
     // MARK: Animations (WIP)
     
-    private func animationAlpha(index:Int, var _ offset:CGFloat){
-        let cView = view.subviews[index] 
-        
-        if(offset > 1.0){
-            offset = 1.0 + (1.0 - offset)
+    private func animationAlpha(index:Int, _ offset:CGFloat){
+        let cView = view.subviews[index]
+        var mutableOffset = offset
+        if(mutableOffset > 1.0){
+            mutableOffset = 1.0 + (1.0 - mutableOffset)
         }
-        cView.alpha = (offset)
+        cView.alpha = (mutableOffset)
     }
     
     private func animationCurve(index:Int, _ offset:CGFloat){
         var transform = CATransform3DIdentity
         let x:CGFloat = (1.0 - offset) * 10
         transform = CATransform3DTranslate(transform, (pow(x,3) - (x * 25)) * subsWeights[index].x, (pow(x,3) - (x * 20)) * subsWeights[index].y, 0 )
-        applyTransform(index, transform: transform)
+        applyTransform(index: index, transform: transform)
     }
     
     private func animationZoom(index:Int, _ offset:CGFloat){
         var transform = CATransform3DIdentity
-
+        
         var tmpOffset = offset
         if(tmpOffset > 1.0){
             tmpOffset = 1.0 + (1.0 - tmpOffset)
         }
         let scale:CGFloat = (1.0 - tmpOffset)
         transform = CATransform3DScale(transform, 1 - scale , 1 - scale, 1.0)
-        applyTransform(index, transform: transform)
+        applyTransform(index: index, transform: transform)
     }
     
     private func animationLinear(index:Int, _ offset:CGFloat){
         var transform = CATransform3DIdentity
         let mx:CGFloat = (1.0 - offset) * 100
         transform = CATransform3DTranslate(transform, mx * subsWeights[index].x, mx * subsWeights[index].y, 0 )
-        applyTransform(index, transform: transform)
+        applyTransform(index: index, transform: transform)
     }
     
     private func animationInOut(index:Int, _ offset:CGFloat){
@@ -160,7 +163,7 @@ public class BWWalkthroughPageViewController: UIViewController, BWWalkthroughPag
             tmpOffset = 1.0 + (1.0 - tmpOffset)
         }
         transform = CATransform3DTranslate(transform, (1.0 - tmpOffset) * subsWeights[index].x * 100, (1.0 - tmpOffset) * subsWeights[index].y * 100, 0)
-        applyTransform(index, transform: transform)
+        applyTransform(index: index, transform: transform)
     }
     
     private func applyTransform(index:Int, transform:CATransform3D){

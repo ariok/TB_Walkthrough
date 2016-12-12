@@ -15,7 +15,7 @@ class MyCustomPageViewController: BWWalkthroughPageViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.layer.zPosition = -1000
-        view.layer.doubleSided = false
+        view.layer.isDoubleSided = false
         self.backgroundView.layer.masksToBounds = false
         
         // Do any additional setup after loading the view.
