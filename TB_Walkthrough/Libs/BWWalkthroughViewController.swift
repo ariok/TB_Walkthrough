@@ -1,36 +1,36 @@
 /*
-The MIT License (MIT)
-
-Copyright (c) 2015 Yari D'areglia @bitwaker
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+ The MIT License (MIT)
+ 
+ Copyright (c) 2015 Yari D'areglia @bitwaker
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ */
 
 import UIKit
 
 // MARK: - Protocols -
 
 /**
-Walkthrough Delegate:
-This delegate performs basic operations such as dismissing the Walkthrough or call whatever action on page change.
-Probably the Walkthrough is presented by this delegate.
-**/
+ Walkthrough Delegate:
+ This delegate performs basic operations such as dismissing the Walkthrough or call whatever action on page change.
+ Probably the Walkthrough is presented by this delegate.
+ **/
 
 @objc public protocol BWWalkthroughViewControllerDelegate{
     
@@ -38,14 +38,14 @@ Probably the Walkthrough is presented by this delegate.
     @objc optional func walkthroughNextButtonPressed()               //
     @objc optional func walkthroughPrevButtonPressed()               //
     @objc optional func walkthroughPageDidChange(pageNumber:Int)     // Called when current page changes
-
+    
 }
 
-/** 
-Walkthrough Page:
-The walkthrough page represents any page added to the Walkthrough.
-At the moment it's only used to perform custom animations on didScroll.
-**/
+/**
+ Walkthrough Page:
+ The walkthrough page represents any page added to the Walkthrough.
+ At the moment it's only used to perform custom animations on didScroll.
+ **/
 @objc public protocol BWWalkthroughPage{
     // While sliding to the "next" slide (from right to left), the "current" slide changes its offset from 1.0 to 2.0 while the "next" slide changes it from 0.0 to 1.0
     // While sliding to the "previous" slide (left to right), the current slide changes its offset from 1.0 to 0.0 while the "previous" slide changes it from 2.0 to 1.0
@@ -103,7 +103,7 @@ At the moment it's only used to perform custom animations on didScroll.
         scrollview = UIScrollView()
         scrollview.showsHorizontalScrollIndicator = false
         scrollview.showsVerticalScrollIndicator = false
-        scrollview.pagingEnabled = true
+        scrollview.isPagingEnabled = true
         
         // Controllers as empty array
         controllers = Array()
@@ -111,7 +111,7 @@ At the moment it's only used to perform custom animations on didScroll.
         super.init(coder: aDecoder)
     }
     
-    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: NSBundle?){
+    override init(nibName nibNameOrNil: String?, bundle nibBundleOrNil: Bundle?){
         scrollview = UIScrollView()
         controllers = Array()
         super.init(nibName: nibNameOrNil, bundle: nibBundleOrNil)
@@ -122,23 +122,23 @@ At the moment it's only used to perform custom animations on didScroll.
         
         // Initialize UI Elements
         
-        pageControl?.addTarget(self, action: "pageControlDidTouch", forControlEvents: UIControlEvents.TouchUpInside)
+        pageControl?.addTarget(self, action: #selector(BWWalkthroughViewController.pageControlDidTouch), for: UIControlEvents.touchUpInside)
         
         // Scrollview
         
         scrollview.delegate = self
         scrollview.translatesAutoresizingMaskIntoConstraints = false
         
-        view.insertSubview(scrollview, atIndex: 0) //scrollview is inserted as first view of the hierarchy
+        view.insertSubview(scrollview, at: 0) //scrollview is inserted as first view of the hierarchy
         
         // Set scrollview related constraints
         
-        view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-0-[scrollview]-0-|", options:[], metrics: nil, views: ["scrollview":scrollview]))
-        view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-0-[scrollview]-0-|", options:[], metrics: nil, views: ["scrollview":scrollview]))
+        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-0-[scrollview]-0-|", options:[], metrics: nil, views: ["scrollview":scrollview]))
+        view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-0-[scrollview]-0-|", options:[], metrics: nil, views: ["scrollview":scrollview]))
         
     }
     
-    override public func viewWillAppear(animated: Bool) {
+    override public func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated);
         
         pageControl?.numberOfPages = controllers.count
@@ -155,7 +155,7 @@ At the moment it's only used to perform custom animations on didScroll.
         if (currentPage + 1) < controllers.count {
             
             delegate?.walkthroughNextButtonPressed?()
-            gotoPage(currentPage + 1)
+            gotoPage(page: currentPage + 1)
         }
     }
     
@@ -164,7 +164,7 @@ At the moment it's only used to perform custom animations on didScroll.
         if currentPage > 0 {
             
             delegate?.walkthroughPrevButtonPressed?()
-            gotoPage(currentPage - 1)
+            gotoPage(page: currentPage - 1)
         }
     }
     
@@ -175,9 +175,9 @@ At the moment it's only used to perform custom animations on didScroll.
     }
     
     func pageControlDidTouch(){
-
+        
         if let pc = pageControl{
-            gotoPage(pc.currentPage)
+            gotoPage(page: pc.currentPage)
         }
     }
     
@@ -191,10 +191,10 @@ At the moment it's only used to perform custom animations on didScroll.
     }
     
     /**
-    addViewController
-    Add a new page to the walkthrough. 
-    To have information about the current position of the page in the walkthrough add a UIVIewController which implements BWWalkthroughPage    
-    */
+     addViewController
+     Add a new page to the walkthrough.
+     To have information about the current position of the page in the walkthrough add a UIVIewController which implements BWWalkthroughPage
+     */
     public func addViewController(vc:UIViewController)->Void{
         
         controllers.append(vc)
@@ -210,14 +210,14 @@ At the moment it's only used to perform custom animations on didScroll.
         
         // - Generic cnst
         
-        vc.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:[view(h)]", options:[], metrics: metricDict, views: ["view":vc.view]))
-        vc.view.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:[view(w)]", options:[], metrics: metricDict, views: ["view":vc.view]))
-        scrollview.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("V:|-0-[view]|", options:[], metrics: nil, views: ["view":vc.view,]))
+        vc.view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:[view(h)]", options:[], metrics: metricDict, views: ["view":vc.view]))
+        vc.view.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:[view(w)]", options:[], metrics: metricDict, views: ["view":vc.view]))
+        scrollview.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "V:|-0-[view]|", options:[], metrics: nil, views: ["view":vc.view,]))
         
         // cnst for position: 1st element
         
         if controllers.count == 1{
-            scrollview.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:|-0-[view]", options:[], metrics: nil, views: ["view":vc.view,]))
+            scrollview.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:|-0-[view]", options:[], metrics: nil, views: ["view":vc.view,]))
             
             // cnst for position: other elements
             
@@ -226,19 +226,19 @@ At the moment it's only used to perform custom animations on didScroll.
             let previousVC = controllers[controllers.count-2]
             let previousView = previousVC.view;
             
-            scrollview.addConstraints(NSLayoutConstraint.constraintsWithVisualFormat("H:[previousView]-0-[view]", options:[], metrics: nil, views: ["previousView":previousView,"view":vc.view]))
+            scrollview.addConstraints(NSLayoutConstraint.constraints(withVisualFormat: "H:[previousView]-0-[view]", options:[], metrics: nil, views: ["previousView":previousView,"view":vc.view]))
             
             if let cst = lastViewConstraint{
                 scrollview.removeConstraints(cst as! [NSLayoutConstraint])
             }
-            lastViewConstraint = NSLayoutConstraint.constraintsWithVisualFormat("H:[view]-0-|", options:[], metrics: nil, views: ["view":vc.view])
+            lastViewConstraint = NSLayoutConstraint.constraints(withVisualFormat: "H:[view]-0-|", options:[], metrics: nil, views: ["view":vc.view]) as NSArray?
             scrollview.addConstraints(lastViewConstraint! as! [NSLayoutConstraint])
         }
     }
-
-    /** 
-    Update the UI to reflect the current walkthrough status
-    **/
+    
+    /**
+     Update the UI to reflect the current walkthrough status
+     **/
     
     private func updateUI(){
         
@@ -248,20 +248,20 @@ At the moment it's only used to perform custom animations on didScroll.
         
         // Notify delegate about the new page
         
-        delegate?.walkthroughPageDidChange?(currentPage)
+        delegate?.walkthroughPageDidChange?(pageNumber: currentPage)
         
         // Hide/Show navigation buttons
         
         if currentPage == controllers.count - 1{
-            nextButton?.hidden = true
+            nextButton?.isHidden = true
         }else{
-            nextButton?.hidden = false
+            nextButton?.isHidden = false
         }
         
         if currentPage == 0{
-            prevButton?.hidden = true
+            prevButton?.isHidden = true
         }else{
-            prevButton?.hidden = false
+            prevButton?.isHidden = false
         }
     }
     
@@ -269,10 +269,10 @@ At the moment it's only used to perform custom animations on didScroll.
     
     public func scrollViewDidScroll(sv: UIScrollView) {
         
-        for var i=0; i < controllers.count; i++ {
+        for i in 0 ..< controllers.count {
             
             if let vc = controllers[i] as? BWWalkthroughPage{
-            
+                
                 let mx = ((scrollview.contentOffset.x + view.bounds.size.width) - (view.bounds.size.width * CGFloat(i))) / view.bounds.size.width
                 
                 // While sliding to the "next" slide (from right to left), the "current" slide changes its offset from 1.0 to 2.0 while the "next" slide changes it from 0.0 to 1.0
@@ -285,7 +285,7 @@ At the moment it's only used to perform custom animations on didScroll.
                 
                 // We animate only the previous, current and next page
                 if(mx < 2 && mx > -2.0){
-                    vc.walkthroughDidScroll(scrollview.contentOffset.x, offset: mx)
+                    vc.walkthroughDidScroll(position: scrollview.contentOffset.x, offset: mx)
                 }
             }
         }
@@ -300,11 +300,11 @@ At the moment it's only used to perform custom animations on didScroll.
     }
     
     /* WIP */
-    override public func willTransitionToTraitCollection(newCollection: UITraitCollection, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+    public func willTransitionToTraitCollection(newCollection: UITraitCollection, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
         print("CHANGE")
     }
     
-    override public func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+    public func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
         print("SIZE")
     }
     

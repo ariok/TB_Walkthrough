@@ -17,7 +17,7 @@ class MainViewController: UIViewController, BWWalkthroughViewControllerDelegate 
         super.viewDidLoad()
     }
     
-    override func viewDidAppear(animated: Bool) {
+    override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         if needWalkthrough {
             self.presentWalkthrough()
@@ -27,20 +27,20 @@ class MainViewController: UIViewController, BWWalkthroughViewControllerDelegate 
     @IBAction func presentWalkthrough(){
         
         let stb = UIStoryboard(name: "Main", bundle: nil)
-        walkthrough = stb.instantiateViewControllerWithIdentifier("container") as! BWWalkthroughViewController
-        let page_one = stb.instantiateViewControllerWithIdentifier("page_1")
-        let page_two = stb.instantiateViewControllerWithIdentifier("page_2")
-        let page_three = stb.instantiateViewControllerWithIdentifier("page_3")
-        let page_four = stb.instantiateViewControllerWithIdentifier("page_4")
+        walkthrough = stb.instantiateViewController(withIdentifier: "container") as! BWWalkthroughViewController
+        let page_one = stb.instantiateViewController(withIdentifier: "page_1")
+        let page_two = stb.instantiateViewController(withIdentifier: "page_2")
+        let page_three = stb.instantiateViewController(withIdentifier: "page_3")
+        let page_four = stb.instantiateViewController(withIdentifier: "page_4")
         
         // Attach the pages to the master
         walkthrough.delegate = self
-        walkthrough.addViewController(page_one)
-        walkthrough.addViewController(page_two)
-        walkthrough.addViewController(page_three)
-        walkthrough.addViewController(page_four)
+        walkthrough.addViewController(vc: page_one)
+        walkthrough.addViewController(vc: page_two)
+        walkthrough.addViewController(vc: page_three)
+        walkthrough.addViewController(vc: page_four)
         
-        self.presentViewController(walkthrough, animated: true) {
+        self.present(walkthrough, animated: true) {
             ()->() in
             self.needWalkthrough = false
         }
@@ -51,14 +51,14 @@ class MainViewController: UIViewController, BWWalkthroughViewControllerDelegate 
 extension MainViewController{
     
     func walkthroughCloseButtonPressed() {
-        self.dismissViewControllerAnimated(true, completion: nil)
+        self.dismiss(animated: true, completion: nil)
     }
     
-    func walkthroughPageDidChange(pageNumber: Int) {
+    func walkthroughPageDidChange(_ pageNumber: Int) {
         if (self.walkthrough.numberOfPages - 1) == pageNumber{
-            self.walkthrough.closeButton?.hidden = false
+            self.walkthrough.closeButton?.isHidden = false
         }else{
-            self.walkthrough.closeButton?.hidden = true
+            self.walkthrough.closeButton?.isHidden = true
         }
     }
     
